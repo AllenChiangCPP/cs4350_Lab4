@@ -1,0 +1,118 @@
+CREATE DATABASE IF NOT EXISTS PomonaTransitSystem;
+USE PomonaTransitSystem;
+
+CREATE TABLE IF NOT EXISTS Trip (
+    TripNumber INT PRIMARY KEY,
+    StartLocationName VARCHAR(255),
+    DestinationName VARCHAR(255)
+);
+
+CREATE TABLE IF NOT EXISTS TripOffering (
+    TripNumber INT,
+    Date DATE,
+    ScheduledStartTime TIME,
+    ScheduledArrivalTime TIME,
+    DriverName VARCHAR(255),
+    BusID INT,
+    PRIMARY KEY (TripNumber, Date, ScheduledStartTime),
+    FOREIGN KEY (TripNumber) REFERENCES Trip(TripNumber)
+);
+
+CREATE TABLE IF NOT EXISTS Bus (
+    BusID INT PRIMARY KEY,
+    Model VARCHAR(255),
+    Year INT
+);
+
+CREATE TABLE IF NOT EXISTS Driver (
+    DriverName VARCHAR(255) PRIMARY KEY,
+    DriverTelephoneNumber VARCHAR(20)
+);
+
+CREATE TABLE IF NOT EXISTS Stop (
+    StopNumber INT PRIMARY KEY,
+    StopAddress VARCHAR(255)
+);
+
+CREATE TABLE IF NOT EXISTS ActualTripStopInfo (
+    TripNumber INT,
+    Date DATE,
+    ScheduledStartTime TIME,
+    StopNumber INT,
+    ScheduledArrivalTime TIME,
+    ActualStartTime TIME,
+    ActualArrivalTime TIME,
+    NumberOfPassengerIn INT,
+    NumberOfPassengerOut INT,
+    PRIMARY KEY (TripNumber, Date, ScheduledStartTime, StopNumber),
+    FOREIGN KEY (TripNumber, Date, ScheduledStartTime) REFERENCES TripOffering(TripNumber, Date, ScheduledStartTime),
+    FOREIGN KEY (StopNumber) REFERENCES Stop(StopNumber)
+);
+
+CREATE TABLE IF NOT EXISTS TripStopInfo (
+    TripNumber INT,
+    StopNumber INT,
+    SequenceNumber INT,
+    DrivingTime TIME,
+    PRIMARY KEY (TripNumber, StopNumber),
+    FOREIGN KEY (TripNumber) REFERENCES Trip(TripNumber),
+    FOREIGN KEY (StopNumber) REFERENCES Stop(StopNumber)
+);
+
+
+INSERT IGNORE INTO Trip (TripNumber, StartLocationName, DestinationName)
+VALUES
+(1, 'StartLocation1', 'Destination1'),
+(2, 'StartLocation2', 'Destination2'),
+(3, 'StartLocation3', 'Destination3'),
+(4, 'StartLocation4', 'Destination4'),
+(5, 'StartLocation5', 'Destination5'),
+(6, 'StartLocation6', 'Destination6'),
+(7, 'StartLocation7', 'Destination7'),
+(8, 'StartLocation8', 'Destination8'),
+(9, 'StartLocation9', 'Destination9');
+
+
+INSERT IGNORE INTO Bus (BusID, Model, Year)
+VALUES
+(101, 'ModelA', 2020),
+(102, 'ModelB', 2021),
+(103, 'ModelC', 2019);
+
+
+INSERT IGNORE INTO Driver (DriverName, DriverTelephoneNumber)
+VALUES
+('Driver1', '123-456-7890'),
+('Driver2', '987-654-3210'),
+('Driver3', '111-222-3333');
+
+INSERT IGNORE INTO Stop (StopNumber, StopAddress)
+VALUES
+(1, 'StopAddress1'),
+(2, 'StopAddress2'),
+(3, 'StopAddress3');
+
+
+INSERT IGNORE INTO TripOffering (TripNumber, Date, ScheduledStartTime, ScheduledArrivalTime, DriverName, BusID)
+VALUES
+(1, '2023-11-25', '08:00:00', '10:00:00', 'Driver1', 101),
+(2, '2023-11-26', '09:00:00', '11:00:00', 'Driver2', 102),
+(3, '2023-11-27', '10:00:00', '12:00:00', 'Driver3', 103);
+
+
+INSERT IGNORE INTO TripStopInfo (TripNumber, StopNumber, SequenceNumber, DrivingTime)
+VALUES
+(1, 1, 1, '00:15:00'),
+(1, 2, 2, '00:30:00'),
+(1, 3, 3, '00:45:00'),
+(2, 1, 1, '00:20:00'),
+(2, 2, 2, '00:40:00'),
+(2, 3, 3, '01:00:00');
+
+
+INSERT IGNORE INTO ActualTripStopInfo (TripNumber, Date, ScheduledStartTime, StopNumber, ScheduledArrivalTime, ActualStartTime, ActualArrivalTime, NumberOfPassengerIn, NumberOfPassengerOut)
+VALUES
+(1, '2023-11-25', '08:00:00', 1, '08:15:00', '08:10:00', '08:20:00', 5, 2),
+(1, '2023-11-25', '08:00:00', 2, '08:30:00', '08:25:00', '08:35:00', 8, 3),
+(1, '2023-11-25', '08:00:00', 3, '08:45:00', '08:40:00', '08:50:00', 10, 1);
+
